@@ -758,6 +758,8 @@ try:
                 oem_id['flavor']['node']['name'] + "\033[0m")
     logger.info("Your deployment flavor is \t\033[31m" +
                 oem_id['flavor']['name'] + "\033[0m")
+    logger.info("Your deployment volume type is \t\033[31m" +
+                oem_id['flavor']['voltype'] + "\033[0m")
 
     try:
         if str(oem_id['flavor']['voltype']) == "replica":
