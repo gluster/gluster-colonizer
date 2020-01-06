@@ -1,0 +1,9 @@
+replica:
+    min_number_nodes: 6
+    max_number_nodes: 24
+    mul_number_nodes: 6
+disperse:
+    min_number_nodes: 4
+    max_number_nodes: 24
+    mul_number_nodes: 2
+

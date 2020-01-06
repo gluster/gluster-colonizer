@@ -124,9 +124,28 @@ perf_server_list = "/var/tmp/g1-perf-server.list-" + "".join(
     random.sample(rand_filename_sample, rand_filename_len))
 perf_output = "/root/g1-perf-results.out"
 
-# Set maximum number of nodes
-# TODO: Move this to OEMID file
-nodes_max = 24
+# At this point we have already read the flavour file
+# Let's configure the nodes settings based on the recommended values
+# Later we could allow for some specific settings in the flavour that
+# can override the recommended values
+try:
+    with open("resources/settings/recommended_num_nodes.yml", "r") as r:
+        recoms = yaml.load(r.read())
+        flavor = oem_id['flavor']['voltype']
+        if flavor in recoms:
+            nodes_min = recoms[flavor]['min_number_nodes']
+            nodes_max = recoms[flavor]['max_number_nodes']
+            nodes_multiple = recoms[flavor]['mul_number_nodes']
+        else:
+            logger.error("The 'voltype' set is not one of those we have\
+                     recommendations")
+            logger.error(stdout)
+            logger.error(stderr)
+            sys.exit(1)
+except:
+    print("There was an issue opening the recommendation file")
+    sys.exit(1)
+
 
 # Note: These are for NFS-Ganesha; CTDB should run on all nodes
 # Set HA node min, max, and factor
@@ -414,7 +433,6 @@ def startDhcpService():
 
 def collectDeploymentInformation():
     # Function to set specifics for deployment
-    global nodes_min
     global replica
     global replica_count
     global arbiter_count
@@ -762,8 +780,6 @@ try:
     try:
         if str(oem_id['flavor']['voltype']) == "replica":
             # Set gdeploy values for replica volume type
-            nodes_min = 4
-            nodes_multiple = 2
             replica = 'yes'
             try:
                 str(oem_id['flavor']['arbiter_size_factor'])
@@ -780,8 +796,6 @@ try:
             redundancy_count = str('\'0\'')
         elif str(oem_id['flavor']['voltype']) == "disperse":
             # Set gdeploy values for disperse volume type
-            nodes_min = 6
-            nodes_multiple = 6
             replica = 'no'
             replica_count = str('\'0\'')
             arbiter_count = str('\'0\'')
